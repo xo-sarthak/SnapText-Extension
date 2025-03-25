@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "SnapText",
+    "version": "1.0",
+    "description": "Expands shorthand into full words using custom shortcuts",
+    "permissions": ["storage"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon.png"
+        }
+    }
+}
