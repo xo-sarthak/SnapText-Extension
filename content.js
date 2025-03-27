@@ -1,18 +1,22 @@
-document.addEventListener("input", function(event) {
-    let target = event.target;
+document.addEventListener("keydown", function (event) {
+  let target = event.target;
 
-    if(target == TEXTAREA || target == INPUT) {
-        let text = target.value;
-    }
-
-    let shortcuts = {
+  if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") {
+    if (event.key === " " || event.key === "\n") {
+      let text = target.value;
+      let shortcuts = {
         ":addr": "123 Street, City",
         ":email": "user@example.com",
         ":ty": "Thank you!",
-    };
+      };
 
-    for(let key in shortcuts) {
-        text = text.replaceAll(key, shortcuts[key]);
+      let words = text.split(" ");
+      let lastWord = words[words.length - 2];
+
+      if (shortcuts[lastWord]) {
+        words[words.length - 2] = shortcuts[lastWord];
+        target.value = words.join(" ");
+      }
     }
-    target.value = text;
-})
+  }
+});
