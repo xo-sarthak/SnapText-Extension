@@ -4,6 +4,7 @@
     "version": "1.0",
     "description": "Expands shorthand into full words using custom shortcuts",
     "permissions": ["storage"],
+    "options_page": "options.html",
     "background": {
         "service_worker": "background.js"
     },
