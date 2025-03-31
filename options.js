@@ -1,23 +1,25 @@
 console.log("✅ options.js is running!");
 
 let addShortcut = document.getElementById("addShortcut");
-let saveShortcut = document.getElementById("saveShortcut");
 let shortcutList = document.getElementById("shortcutList");
 
 let shortcuts = {};
 
 chrome.storage.sync.get("shortcuts", (data) => {
-    if(chrome.runtime.lastError) {
-        console.error("❌", chrome.runtime.lastError);
-        return;
-    }
-    console.log("hello");
-    console.log("x", data);
     if(data.shortcuts) {
         shortcuts = data.shortcuts;
-        console.log("y", shortcuts);
         updateList();
-    } else {
-        console.log("blahh")
+    }
+});
+
+addShortcut.addEventListener("click", (e) => {
+    let key = document.getElementById("shortcutKey").value.trim();
+    let value = document.getElementById("expandedKey").value.trim();
+
+    if(key && value) {
+        shortcuts[key] = value;
+        updateList();
+        document.getElementById("shortcutKey").value = "";
+        document.getElementById("expandedKey").value = "";
     }
 })
