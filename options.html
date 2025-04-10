@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>SnapText Extension</title>
 </head>
 <body>
     <h2>Manage Your Shortcuts</h2>
@@ -14,10 +14,16 @@
     <label for="expandedKey">Expanded Key:</label>
     <input placeholder="eg., 123 Street, City" id="expandedKey">
 
-    <button id="addShortcut">Shortcut</button>
-    <button id="saveShortcut">Save</button>
+    <button id="addShortcut">Add Shortcut</button>
+    <button id="updateShortcut" style="display: none;">Update Shortcut</button>
+    <!-- <button id="saveShortcut">Save</button> -->
 
     <h3>Saved Shortcuts:</h3>
-    <ul id="ShortcutList"></ul>
+    <ul id="shortcutList"></ul>
+    <p id="saveStatus" style="opacity: 0; transition: opacity 0.5s; color: green;"></p>
+    <p id="deleteStatus" style="opacity: 0; transition: opacity 0.5s; color: red;"></p>
+
+    
+    <script src="options.js"></script>
 </body>
 </html>
