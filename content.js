@@ -1,9 +1,9 @@
-document.addEventListener("keydown", function (event) {
+function expandShortcuts(event) {
   let target = event.target;
 
   if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") {
     if (event.key === " " || event.key === "\n") {
-      chrome.storage.sync.get("shortcuts", function(data) {
+      chrome.storage.sync.get("shortcuts", function (data) {
         let shortcuts = data.shortcuts || {};
       });
       let text = target.value;
@@ -22,4 +22,21 @@ document.addEventListener("keydown", function (event) {
       }
     }
   }
+}
+
+const obvserver = new MutationObserver((mutations) => {
+  mutations.addNodes.forEach((node) => {
+    if (
+      node.tagName === "TEXTAREA" ||
+      node.tagName === "INPUT" ||
+      node.isContentEditable
+    ) {
+      node.addEventListener("keydown", expandShortcuts);
+    }
+  });
+});
+
+obvserver.observe(document.body, {
+  childList: true,
+  subtree: true,
 });
