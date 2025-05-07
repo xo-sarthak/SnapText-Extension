@@ -25,7 +25,7 @@ function expandShortcuts(event) {
 }
 
 const obvserver = new MutationObserver((mutations) => {
-  mutations.addNodes.forEach((node) => {
+  mutations.addNodes.forEach((mutation) => {
     if (
       node.tagName === "TEXTAREA" ||
       node.tagName === "INPUT" ||
