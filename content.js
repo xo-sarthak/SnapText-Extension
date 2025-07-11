@@ -159,3 +159,11 @@ observer.observe(document.body, {   // here we are telling observer to keep watc
 // We’re telling the observer:
 // “Start watching the entire page for any new elements added anywhere inside it — not just on top-level body but deep down too.”
 
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  // Listen for changes in Chrome storage
+  if (namespace === "sync" && changes.shortcuts) {
+    // If 'shortcuts' changed in the 'sync' storage area
+    shortcuts = changes.shortcuts.newValue || {};  // Update local shortcuts object
+    console.log("Shortcuts updated from storage:", shortcuts);
+  }
+});
