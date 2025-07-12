@@ -183,7 +183,9 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 
 function getLastWord(textBeforeCursor) {
   const words = textBeforeCursor.trim().split(/\s+/); // this is just a fucntion that is splitting and adding words to an array.
-  return words[words.length - 1] || "";
+  // return words[words.length - 1] || "";  // commented this out after creating sanitized function. lines below this comment are also added after creation of sanitize.
+  const lastWord = words[words.length - 1] || "";
+  return sanitize(lastWord);
 } 
 
 function replaceLastWordInText(text, cursorPosition, lastWord, expansion) {
@@ -219,4 +221,35 @@ function replaceLastWordInContentEditable(node, offset, lastWord, expansion) {
 
   selection.removeAllRanges();
   selection.addRange(newRange);
+}
+
+// my approach will be to have a recursive call cause we dont know how many puntuations a user would have.
+// function sanitize(textBeforeCursor) {
+//   if(words[words.length - 1] !== "." || "," || "!" || "?" || ";" || ":") {
+//     lastWord = words[words.length - 1];
+//     return lastWord;
+//   }
+//   const words = textBeforeCursor.trim().split(/\s+/);
+//   if(words[words.length - 1] === "." || "," || "!" || "?" || ";" || ":") {
+//     words.splice(words.length - 1, 1);
+//     sanitize(textBeforeCursor);
+//   }
+// }
+
+//COMMENTED OUT MY RECURSIVE APPROACH ABOVE AS IT HAD SOME ERRORS, FIXED VERSION IS BELOW
+function sanitize(textBeforeCursor) {
+  const words = textBeforeCursor.trim().split(/\s+/);
+  let lastWord = words[words.length - 1];
+
+  // Base Case.
+  if(!/[.,!?;:]$/.test(lastWord)) {
+    return lastWord;
+  }
+  
+  // removing trailing punctuation.
+  lastWord = lastWord.slice(0, -1); // here wa have updated last word by removing punctuation from the last.  // In JavaScript, when you use .slice(0, -1) on a string, it means: 0 is the starting index (the very beginning of the string). -1 is a special value: it means "up to, but not including, the last character."
+  words[words.length - 1] = lastWord;
+
+  // recursive call.
+  return sanitize(words.join(" ")); // It takes the array of words and joins them back into a single string, inserting a space (" ") between each word.
 }
