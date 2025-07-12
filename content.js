@@ -47,23 +47,28 @@ function processInputOrTextArea(element) {
   let text = element.value;
   let cursorPosition = element.selectionStart;
   let textBeforeCursor = text.substring(0, cursorPosition);
-  let words = text.split(" ");
-  let lastWord = words[words.length - 1];
+  // let words = text.split(" ");
+  // let lastWord = words[words.length - 1]; the reason these two lines have been commented out is because we have created a helper function that will do work of these lines.
+  let lastWord = getLastWord(textBeforeCursor);
 
   console.log("Last word detected:", lastWord);
 
   if (shortcuts[lastWord]) {
-    const lastWordStart = textBeforeCursor.length - lastWord.length;
-    const newText =
-      text.substring(0, lastWordStart) +
-      shortcuts[lastWord] +
-      text.substring(cursorPosition);
+    // const lastWordStart = textBeforeCursor.length - lastWord.length;
+    // const newText =
+    //   text.substring(0, lastWordStart) +
+    //   shortcuts[lastWord] +
+    //   text.substring(cursorPosition);
+    // element.value = newText;
+
+    // const newPosition = lastWordStart + shortcuts[lastWord].length;
+
+    // // the line below dosent return anything so no need to assign it to anything
+    // element.setSelectionRange(newPosition, newPosition); 
+    // THIS WHOLE CODE BLOCK ABOVE IS REPLACED BY THE FUNCTION CALL BELOW.
+    const { newText, newCursorPosition } = replaceLastWordInText(text, cursorPosition, lastWord, shortcuts[lastWord]);
     element.value = newText;
-
-    const newPosition = lastWordStart + shortcuts[lastWord].length;
-
-    // the line below dosent return anything so no need to assign it to anything
-    element.setSelectionRange(newPosition, newPosition);
+    element.setSelectionRange(newCursorPosition, newCursorPosition);
   }
 
   console.log("lastWord", lastWord);
@@ -90,30 +95,35 @@ function processContentEditable(element) {
 
   const text = node.textContent;
   const textBeforeCursor = text.substring(0, offset); // selects all the text before the caret position that is the offset.
-  const words = textBeforeCursor.split(" "); // splits the text before the caret into words based on spaces
-  const lastWord = words[words.length - 1];
+  // const words = textBeforeCursor.split(" "); // splits the text before the caret into words based on spaces
+  // const lastWord = words[words.length - 1]; // the reason these two lines have been commented out is because we have created a helper function that will do work of these lines.
+  const lastWord = getLastWord(textBeforeCursor);
 
+  // if(shortcuts[lastWord]) {
+  //   const lastWordStart = textBeforeCursor.length - lastWord.length;
+  //   const expandedText = shortcuts[lastWord];
+  //   const newText = text.substring(0, lastWordStart) + expandedText + text.substring(offset); // here we basically create the new word, with only one value present in substring method, what it does is that starts from there and goes till end of the text node, good way no not alter with whats after the caret position.
+  //   // below is the example of whats happening
+  //   // text = "see you brb"
+  //   // offset = 10
+
+  //   // text.substring(0, 7) = "see you "
+  //   // expandedText = "be right back"
+  //   // text.substring(10) = "" (caret was at the end)
+
+  //   // newText = "see you be right back"
+  //   node.textContent = newText; // updating the node text with new one.
+  //   const newOffset = lastWordStart + expandedText.length; // new caret position: right after the expanded word, even if there's more text after it.
+  //   const newRange = document.createRange(); // range means something that tells where the caret should be like between what and in which node just like we saw above, it has things like this in it.
+  //   newRange.setStart(node, newOffset); // tells where the caret should be placed after replacement, like in "node" at offset i.e. the index where it ends.
+  //   newRange.collapse(true); // turns the range into a collapsed range meaning now we dont have a selection of text, just a caret i.e. start === end just like a caret that starts and ends at the same position.
+
+  //   selection.removeAllRanges(); // removes the existing range i.e the previous one.
+  //   selection.addRange(newRange); // adds this new range.
+  // }
+  // THE CODE/FUNCTION BELOW HAS REPLACED WHAT HAS BEEN COMMENTED OUT ON TOP. 
   if(shortcuts[lastWord]) {
-    const lastWordStart = textBeforeCursor.length - lastWord.length;
-    const expandedText = shortcuts[lastWord];
-    const newText = text.substring(0, lastWordStart) + expandedText + text.substring(offset); // here we basically create the new word, with only one value present in substring method, what it does is that starts from there and goes till end of the text node, good way no not alter with whats after the caret position.
-    // below is the example of whats happening
-    // text = "see you brb"
-    // offset = 10
-
-    // text.substring(0, 7) = "see you "
-    // expandedText = "be right back"
-    // text.substring(10) = "" (caret was at the end)
-
-    // newText = "see you be right back"
-    node.textContent = newText; // updating the node text with new one.
-    const newOffset = lastWordStart + expandedText.length; // new caret position: right after the expanded word, even if there's more text after it.
-    const newRange = document.createRange(); // range means something that tells where the caret should be like between what and in which node just like we saw above, it has things like this in it.
-    newRange.setStart(node, newOffset); // tells where the caret should be placed after replacement, like in "node" at offset i.e. the index where it ends.
-    newRange.collapse(true); // turns the range into a collapsed range meaning now we dont have a selection of text, just a caret i.e. start === end just like a caret that starts and ends at the same position.
-
-    selection.removeAllRanges(); // removes the existing range i.e the previous one.
-    selection.addRange(newRange); // adds this new range.
+    replaceLastWordInContentEditable(node, offset, lastWord, shortcuts[lastWord]);
   }
 }
 
@@ -167,3 +177,46 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     console.log("Shortcuts updated from storage:", shortcuts);
   }
 });
+
+// the part below will be used to modularize the shortcut logic.
+// why is it needed, because both processInputOrTextArea() and processContentEditable() are doing all the work of detecting, caret positioning and replacing the word, in order to take load off of them we will modularize the logic with 3 helper functions
+
+function getLastWord(textBeforeCursor) {
+  const words = textBeforeCursor.trim().split(/\s+/); // this is just a fucntion that is splitting and adding words to an array.
+  return words[words.length - 1] || "";
+} 
+
+function replaceLastWordInText(text, cursorPosition, lastWord, expansion) {
+  const textBeforeCursor = text.substring(0, cursorPosition);
+  const lastWordStart = textBeforeCursor.length - lastWord.length;
+
+  const newText = text.substring(0, lastWordStart) + expansion + text.substring(cursorPosition);
+
+  const newCursorPosition = lastWordStart + expansion.length;
+
+  return {newText, newCursorPosition}; // here we are returning an object, basically we can return once only, so we return the object contaiing multiple values that helps us to get more out of the function.
+}
+
+function replaceLastWordInContentEditable(node, offset, lastWord, expansion) {
+  const selection = window.getSelection();
+  if(!selection) return;
+
+  const text = node.textContent;
+  const textBeforeCursor = text.substring(0, offset);
+  const lastWordStart = textBeforeCursor.length - lastWord.length; // tip for last word start - always take it according to textbeforecursor, meaning in accordance to the cursor.
+  
+
+  const newText = text.substring(0, lastWordStart) + expansion + text.substring(offset);
+
+  node.textContent = newText;
+
+  const newOffset = lastWordStart + expansion.length;
+  const newRange = document.createRange();
+  newRange.setStart(node, newOffset); // tells from where to start in what, means in the node start at newOffSet.
+  // If node.textContent = "hello world" and newOffset = 5, then the caret will be placed between "hello" and " world"
+  newRange.collapse(true); // collapsing means not selecting or highlighting anything means just the caret position.
+  // Together, these two lines say: "Put the caret at index newOffset inside this text node — and don’t select anything."
+
+  selection.removeAllRanges();
+  selection.addRange(newRange);
+}
