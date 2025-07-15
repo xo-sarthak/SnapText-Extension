@@ -49,11 +49,12 @@ function processInputOrTextArea(element) {
   let textBeforeCursor = text.substring(0, cursorPosition);
   // let words = text.split(" ");
   // let lastWord = words[words.length - 1]; the reason these two lines have been commented out is because we have created a helper function that will do work of these lines.
-  let lastWord = getLastWord(textBeforeCursor);
+  // let lastWord = getLastWord(textBeforeCursor); // changing this to line below, sanitize fix!!!
+  const {  original, sanitized } = getLastWord(textBeforeCursor);
 
   console.log("Last word detected:", lastWord);
 
-  if (shortcuts[lastWord]) {
+  if (shortcuts[sanitized]) { // changes were made lastWord -> sanitized.
     // const lastWordStart = textBeforeCursor.length - lastWord.length;
     // const newText =
     //   text.substring(0, lastWordStart) +
@@ -66,7 +67,7 @@ function processInputOrTextArea(element) {
     // // the line below dosent return anything so no need to assign it to anything
     // element.setSelectionRange(newPosition, newPosition); 
     // THIS WHOLE CODE BLOCK ABOVE IS REPLACED BY THE FUNCTION CALL BELOW.
-    const { newText, newCursorPosition } = replaceLastWordInText(text, cursorPosition, lastWord, shortcuts[lastWord]);
+    const { newText, newCursorPosition } = replaceLastWordInText(text, cursorPosition, original, shortcuts[sanitized]);
     element.value = newText;
     element.setSelectionRange(newCursorPosition, newCursorPosition);
   }
@@ -97,7 +98,7 @@ function processContentEditable(element) {
   const textBeforeCursor = text.substring(0, offset); // selects all the text before the caret position that is the offset.
   // const words = textBeforeCursor.split(" "); // splits the text before the caret into words based on spaces
   // const lastWord = words[words.length - 1]; // the reason these two lines have been commented out is because we have created a helper function that will do work of these lines.
-  const lastWord = getLastWord(textBeforeCursor);
+  const { original, sanitized } = getLastWord(textBeforeCursor);
 
   // if(shortcuts[lastWord]) {
   //   const lastWordStart = textBeforeCursor.length - lastWord.length;
@@ -122,8 +123,8 @@ function processContentEditable(element) {
   //   selection.addRange(newRange); // adds this new range.
   // }
   // THE CODE/FUNCTION BELOW HAS REPLACED WHAT HAS BEEN COMMENTED OUT ON TOP. 
-  if(shortcuts[lastWord]) {
-    replaceLastWordInContentEditable(node, offset, lastWord, shortcuts[lastWord]);
+  if(shortcuts[sanitized]) { // changes were made lastWord -> sanitized
+    replaceLastWordInContentEditable(node, offset, original, shortcuts[sanitized]);
   }
 }
 
@@ -184,8 +185,13 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 function getLastWord(textBeforeCursor) {
   const words = textBeforeCursor.trim().split(/\s+/); // this is just a fucntion that is splitting and adding words to an array.
   // return words[words.length - 1] || "";  // commented this out after creating sanitized function. lines below this comment are also added after creation of sanitize.
-  const lastWord = words[words.length - 1] || "";
-  return sanitize(lastWord);
+  // const lastWord = words[words.length - 1] || ""; // commented out to fix sanitize error, line is below is what replaces it. // replacing lastWord with originial, to keep check of "yes," and "yes".
+  const original = words[words.length - 1] || "";
+  const sanitized = sanitize(original);
+  return { original, sanitized };
+  // Now getLastWord() gives you both:
+  // original → e.g., "yes,"
+  // sanitized → e.g., "yes"
 } 
 
 function replaceLastWordInText(text, cursorPosition, lastWord, expansion) {
@@ -247,7 +253,7 @@ function sanitize(textBeforeCursor) {
   }
   
   // removing trailing punctuation.
-  lastWord = lastWord.slice(0, -1); // here wa have updated last word by removing punctuation from the last.  // In JavaScript, when you use .slice(0, -1) on a string, it means: 0 is the starting index (the very beginning of the string). -1 is a special value: it means "up to, but not including, the last character."
+  lastWord = lastWord.slice(0, -1); // here we have updated last word by removing punctuation from the last.  // In JavaScript, when you use .slice(0, -1) on a string, it means: 0 is the starting index (the very beginning of the string). -1 is a special value: it means "up to, but not including, the last character."
   words[words.length - 1] = lastWord;
 
   // recursive call.
