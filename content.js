@@ -1,3 +1,10 @@
+// if(!snapTextEnabled) return; // commented out as it can be undefined and null and give false due to them being falsy or not true exactly which will stop the execution of the code due to return, so we by default set it to true;
+// the logic where i check if the extension is enabled or disabled by the user.
+let snapTextEnabled = true;
+
+chrome.storage.sync.get("snapTextEnabled", (data) => {
+  snapTextEnabled = data.snapTextEnabled ?? true; // if data.snapTextEnabled is having a value then take it, else return true;
+});
 console.log("script loaded");
 
 let shortcuts = {};
@@ -72,7 +79,7 @@ function processInputOrTextArea(element) {
     element.setSelectionRange(newCursorPosition, newCursorPosition);
   }
 
-  console.log("lastWord", lastWord);
+  console.log("original", original);
 }
 
 // Process [contenteditable]
@@ -259,3 +266,10 @@ function sanitize(textBeforeCursor) {
   // recursive call.
   return sanitize(words.join(" ")); // It takes the array of words and joins them back into a single string, inserting a space (" ") between each word.
 }
+
+chrome.storage.onChanged.addListener((change, namespace) => { // to see if user enables/disables extension while being on the page itself.
+  if(namespace === "sync" && change.snapTextEnabled) {
+    snapTextEnabled = change.snapTextEnabled.newValue;
+    console.log("Toggle updated:", snapTextEnabled);
+  }
+});
