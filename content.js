@@ -2,9 +2,11 @@
 // the logic where i check if the extension is enabled or disabled by the user.
 let snapTextEnabled = true;
 
-chrome.storage.sync.get("snapTextEnabled", (data) => {
+chrome.storage.sync.get(['snapTextEnabled'], (data) => {
   snapTextEnabled = data.snapTextEnabled ?? true; // if data.snapTextEnabled is having a value then take it, else return true;
 });
+
+if(!snapTextEnabled) return; // tomake sure we act upon the value that we are getting from popup.js.
 console.log("script loaded");
 
 let shortcuts = {};
