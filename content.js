@@ -14,8 +14,14 @@ function initialization () {
     const textFields = document.querySelectorAll("textarea, input, [contenteditable = 'true']");
     textFields.forEach((field) => {
       field.addEventListener("keydown", expandShortcuts)
-    })
-  })
+    });
+
+    // starting obeserver for new fields.
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
 }
 initialization();
 
@@ -217,22 +223,15 @@ const observer = new MutationObserver((mutationsList) => {
   }
 });
 
-observer.observe(document.body, {
-  // here we are telling observer to keep watching the complete body of the document for changes.
-  childList: true, // this tells the observer to watch for the nodes that are being added and removed in the given section, in this case the whole body.
-  subtree: true, // this tells the observer to dive deeper meaning dont just watch document.body but also recursively go deep inside the nested child of the body.
-});
+
+// COMMENTED THIS OUT AS IT WAS GLOBALLY PRESENT HENCE WAS CAUSING INCONSISTENCY SO PUTTING IT INSIDE ONCHANGED AND INITIALIZATION FOR BETTER BEHAVIOUR(THINK OF THIS OBSERVER AS A CCTV CAM).
+// observer.observe(document.body, {
+//   // here we are telling observer to keep watching the complete body of the document for changes.
+//   childList: true, // this tells the observer to watch for the nodes that are being added and removed in the given section, in this case the whole body.
+//   subtree: true, // this tells the observer to dive deeper meaning dont just watch document.body but also recursively go deep inside the nested child of the body.
+// });
 // We’re telling the observer:
 // “Start watching the entire page for any new elements added anywhere inside it — not just on top-level body but deep down too.”
-
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  // Listen for changes in Chrome storage
-  if (namespace === "sync" && changes.shortcuts) {
-    // If 'shortcuts' changed in the 'sync' storage area
-    shortcuts = changes.shortcuts.newValue || {}; // Update local shortcuts object
-    console.log("Shortcuts updated from storage:", shortcuts);
-  }
-});
 
 // the part below will be used to modularize the shortcut logic.
 // why is it needed, because both processInputOrTextArea() and processContentEditable() are doing all the work of detecting, caret positioning and replacing the word, in order to take load off of them we will modularize the logic with 3 helper functions
@@ -318,10 +317,30 @@ function sanitize(textBeforeCursor) {
   return sanitize(words.join(" ")); // It takes the array of words and joins them back into a single string, inserting a space (" ") between each word.
 }
 
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  // Listen for changes in Chrome storage
+  if (namespace === "sync" && changes.shortcuts) {
+    // If 'shortcuts' changed in the 'sync' storage area
+    shortcuts = changes.shortcuts.newValue || {}; // Update local shortcuts object
+    console.log("Shortcuts updated from storage:", shortcuts);
+  }
+});
+
 chrome.storage.onChanged.addListener((change, namespace) => {
   // to see if user enables/disables extension while being on the page itself.
   if (namespace === "sync" && change.snapTextEnabled) {
     snapTextEnabled = change.snapTextEnabled.newValue;
     console.log("Toggle updated:", snapTextEnabled);
+
+    if(snapTextEnabled) {
+      const textFields = document.querySelectorAll("textarea, input, [contenteditable = 'true']");
+      textFields.forEach((field) => {
+        field.addEventListener("keydown", expandShortcuts);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+      console.log("SnapText is disabled: disconnecting observer");
+      observer.disconnect();
+    }
   }
 });
