@@ -124,3 +124,16 @@ function showDeleteStatus() {
     }, 1500);
 }
 
+// Toggle shortcut list visibility
+const toggleList = document.getElementById("toggleList");
+// const shortcutList = document.getElementById("shortcutList");
+
+toggleList.addEventListener("click", () => {
+    const isVisible = shortcutList.classList.toggle("visible");
+    toggleList.classList.toggle("collapsed", !isVisible);
+
+    const arrow = toggleList.querySelector(".arrow");
+    arrow.textContent = "▶";
+});
+
+
