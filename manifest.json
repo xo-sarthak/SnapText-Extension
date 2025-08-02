@@ -1,24 +1,38 @@
 {
-    "manifest_version": 3,
-    "name": "SnapText",
-    "version": "1.0",
-    "description": "Expands shorthand into full words using custom shortcuts",
-    "permissions": ["storage"],
-    "options_page": "options.html",
-    "background": {
-        "service_worker": "background.js"
-    },
-    "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["content.js"],
-            "run_at": "document_idle"
-        }
-    ],
-    "action": {
-        "default_popup": "popup.html",
-        "default_icon": {
-            "16": "icon.png"
-        }
+  "manifest_version": 3,
+  "name": "SnapText",
+  "short_name": "SnapText",
+  "version": "1.0",
+  "version_name": "1.0 Stable",
+  "description": "Expands shorthand into full words using custom shortcuts",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
     }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SnapText - Expand Shortcuts",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
 }
