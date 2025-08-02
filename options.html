@@ -1,29 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnapText Extension</title>
-</head>
-<body>
-    <h2>Manage Your Shortcuts</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnapText Options</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    />
+    <style>
+      /* Same styles as before */
+      * {
+        box-sizing: border-box;
+      }
 
-    <label for="shortcutKey">Shortcut Key:</label>
-    <input placeholder="eg., :addr" id="shortcutKey">
+      body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #1e1e1e;
+        color: #f5f5f7;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 3rem 1rem;
+      }
 
-    <label for="expandedKey">Expanded Key:</label>
-    <input placeholder="eg., 123 Street, City" id="expandedKey">
+      .options-container {
+        background: rgba(40, 40, 40, 0.7);
+        border-radius: 16px;
+        max-width: 420px;
+        width: 100%;
+        padding: 1.75rem 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
 
-    <button id="addShortcut">Add Shortcut</button>
-    <button id="updateShortcut" style="display: none;">Update Shortcut</button>
-    <!-- <button id="saveShortcut">Save</button> -->
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 1.2rem;
+        font-weight: 600;
+        color: #ffffff;
+        text-align: center;
+      }
 
-    <h3>Saved Shortcuts:</h3>
-    <ul id="shortcutList"></ul>
-    <p id="saveStatus" style="opacity: 0; transition: opacity 0.5s; color: green;"></p>
-    <p id="deleteStatus" style="opacity: 0; transition: opacity 0.5s; color: red;"></p>
+      label {
+        display: block;
+        margin: 1rem 0 0.3rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #bbbbbb;
+      }
 
-    
+      input[type="text"] {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        border: 1px solid #444;
+        border-radius: 8px;
+        background: #2c2c2e;
+        color: #f5f5f5;
+        transition: border-color 0.2s ease;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #0a84ff;
+        background: #333;
+      }
+
+      .button-group {
+        margin-top: 1.2rem;
+        display: flex;
+        gap: 0.8rem;
+      }
+
+      button {
+        flex: 1;
+        padding: 0.55rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+      }
+
+      #addShortcut {
+        background: #0a84ff;
+        color: #fff;
+      }
+
+      #addShortcut:hover {
+        background: #0066cc;
+        transform: translateY(-1px);
+      }
+
+      #updateShortcut {
+        background: #ff9f0a;
+        color: #fff;
+      }
+
+      #updateShortcut:hover {
+        background: #cc7a00;
+        transform: translateY(-1px);
+      }
+
+      .shortcut-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .shortcut-toggle span {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #bbbbbb;
+      }
+
+      .shortcut-toggle .arrow {
+        font-size: 1rem;
+        transition: transform 0.3s;
+      }
+
+      /* .shortcut-toggle.collapsed .arrow {
+        transform: rotate(-900deg);
+      } */
+
+      .shortcut-toggle:not(.collapsed) .arrow {
+        transform: rotate(90deg); /* down */
+      }
+
+      .shortcut-toggle.collapsed .arrow {
+        transform: rotate(0deg); /* right */
+      }
+
+      ul#shortcutList {
+        margin-top: 1rem;
+        list-style: none;
+        padding: 0;
+        border-top: 1px solid #333;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.4s ease, opacity 0.4s ease;
+      }
+
+      ul#shortcutList.visible {
+        max-height: 500px; /* large enough for multiple shortcuts */
+        opacity: 1;
+      }
+
+      ul#shortcutList li {
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #2a2a2a;
+        font-size: 0.82rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #e0e0e0;
+        cursor: pointer;
+      }
+
+      ul#shortcutList li:hover {
+        background: #2b2b2b;
+      }
+
+      .social-links {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1.2rem;
+      }
+
+      .social-links a img {
+        width: 20px; /* slightly smaller */
+        height: 20px;
+        filter: invert(100%);
+        transition: transform 0.2s ease, opacity 0.3s ease;
+        opacity: 0.8;
+      }
+
+      .social-links a:hover img {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="options-container">
+      <h1>SnapText – Shortcuts</h1>
+
+      <label for="shortcutKey">Shortcut</label>
+      <input id="shortcutKey" type="text" placeholder="e.g. brb" />
+
+      <label for="expandedKey">Expansion</label>
+      <input id="expandedKey" type="text" placeholder="e.g. be right back" />
+
+      <div class="button-group">
+        <button id="addShortcut">Add</button>
+        <button id="updateShortcut" style="display: none">Update</button>
+      </div>
+
+      <div class="shortcut-toggle collapsed" id="toggleList">
+        <span>Available Shortcuts</span>
+        <span class="arrow">▶</span>
+      </div>
+
+      <ul id="shortcutList"></ul>
+      <!-- Social Links -->
+      <div class="social-links">
+        <a href="https://github.com/xo-sarthak" target="_blank" title="GitHub">
+          <img
+            src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg"
+            alt="GitHub"
+          />
+        </a>
+        <a
+          href="https://www.linkedin.com/in/sarthak-thakur1/"
+          target="_blank"
+          title="LinkedIn"
+        >
+          <img
+            src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg"
+            alt="LinkedIn"
+          />
+        </a>
+      </div>
+    </div>
+
     <script src="options.js"></script>
-</body>
+  </body>
 </html>
