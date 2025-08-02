@@ -340,7 +340,11 @@ chrome.storage.onChanged.addListener((change, namespace) => {
       observer.observe(document.body, { childList: true, subtree: true });
     } else {
       console.log("SnapText is disabled: disconnecting observer");
+      const textFields = document.querySelectorAll("textarea, input, [contenteditable = 'true']");
+      textFields.forEach((field) => {
+        field.removeEventListener("keydown", expandShortcuts);
+      })
       observer.disconnect();
     }
   }
-});
+}); 
