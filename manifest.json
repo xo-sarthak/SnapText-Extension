@@ -8,9 +8,6 @@
   "permissions": ["storage"],
   "host_permissions": ["<all_urls>"],
   "options_page": "options.html",
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
